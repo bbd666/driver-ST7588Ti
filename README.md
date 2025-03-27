@@ -14,7 +14,7 @@ But pin 1 and pin 10  (J2.GPIO 16) must also be powered with 16.5 V through PCB 
 the RESET pin is useless in fact as the initialization is managed by hardware on the PCB (pin 15 (J2.GPIO 9)).
 Then 2 channels for data transfers SDA and SDL on pins 13 (J2.GPIO 4) and pin 14 (J2.GPIO 6).
 
-![AW-60i ](https://github.com/user-attachments/assets/036c5a92-7612-4f3e-97da-e4067c2e1561)
+![pcb](https://github.com/user-attachments/assets/cea4614f-9ed3-4670-bb34-7aa08d37259c)
 
 ![Image1](https://github.com/user-attachments/assets/c55281dd-b286-48ab-beda-7a2a8743ba99)
 
@@ -25,6 +25,7 @@ and there :
 https://www.digimax.it/media_import/DISPLAY/BOLYMIN/LCD%20GRAFICI/BO12864GGPHH$/BO12864GGPHH$_DS_001.pdf
 
 # HOW TO INSTALL
+
 
 This driver needs the PILLOW library to be present on the raspberry first. I think it's pre-installed by default on recent Raspbian packages. 
 Otherwise, just run in a command prompt:
