@@ -27,11 +27,18 @@ https://www.digimax.it/media_import/DISPLAY/BOLYMIN/LCD%20GRAFICI/BO12864GGPHH$/
 # HOW TO INSTALL
 
 This driver needs the PILLOW library to be present on the raspberry first. I think it's pre-installed by default on recent Raspbian packages. 
-In case not,  just run
+Otherwise, just run in a command prompt:
 
-python3 -m pip install --upgrade Pillow
+`python3 -m pip install --upgrade Pillow`
 
-in a command prompt. Complete information here :
+Complete information here :
+
 https://pillow.readthedocs.io/en/stable/installation/basic-installation.html#basic-installation
 
-Then just copy the python script driver_ST5788Ti.py in your folder
+It also requires the SMBUS3 library :
+
+`pip install smbus3`
+
+https://pypi.org/project/smbus3/
+
+Then just copy the python script driver_ST5788Ti.py in your folder.
