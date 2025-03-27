@@ -1,7 +1,7 @@
 # driver-ST7588Ti
 driver I2C for LCD 132 x 80 ST7588Ti
 
-Please find a driver for ST7588Ti LCD and use for Raspberry in python.
+Please find a driver for ST7588Ti LCD for use with Raspberry in python.
 What you must know before using these devices :
 
 They have 15 pins.
