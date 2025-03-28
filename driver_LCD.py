@@ -201,7 +201,10 @@ class LcdDisplay:
 		draw=ImageDraw.Draw(self.FRAME_BUFFER)
 		draw.rectangle((x,y,w,h), outline=o, fill=f)		
 
-	def draw_text(self,x,y,s,police,sz,f):
+	def draw_text(self,x,y,s,font_file,font_size,param_spacing,param_align):
+        #align must be “left”, “center” or “right”.
+        #spacing number of pixels between lines
 		draw=ImageDraw.Draw(self.FRAME_BUFFER)
+        police=ImageFont.truetype(font_file, font_size)
 		if (police==1):
-			draw.text((x,y),s,font=police,size=sz,fill=f)
+			draw.text((x,y),s,font=police,spacing=param_spacing,align=param_align)

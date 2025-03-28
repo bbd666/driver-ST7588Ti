@@ -10,7 +10,7 @@ image_raw=Image.open("logo.bmp")
 image=image_raw.resize((132,80),Image.LANCZOS)
 lcd.load_image(image)
 lcd.draw_rectangle(50,20,40,30,0,1)
-#lcd.draw_text(10,20,"HELLO WORLD",1,10,1)
+lcd.draw_text(10,20,"HELLO WORLD",'/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',12,0,"left")
 lcd.refresh()
 #GPIO.cleanup()
 
