@@ -205,6 +205,6 @@ class LcdDisplay:
         #align must be “left”, “center” or “right”.
         #spacing number of pixels between lines
 		draw=ImageDraw.Draw(self.FRAME_BUFFER)
-        police=ImageFont.truetype(font_file, font_size)
+		police=ImageFont.truetype(font_file, font_size)
 		if (police==1):
 			draw.text((x,y),s,font=police,spacing=param_spacing,align=param_align)
