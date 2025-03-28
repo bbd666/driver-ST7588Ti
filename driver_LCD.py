@@ -204,4 +204,4 @@ class LcdDisplay:
 	def draw_text(self,x,y,s,police,sz,f):
 		draw=ImageDraw.Draw(self.FRAME_BUFFER)
 		if (police==1):
-			draw.text((x,y),s,font=self.police1,size=sz,fill=f)
+			draw.text((x,y),s,font=police,size=sz,fill=f)
