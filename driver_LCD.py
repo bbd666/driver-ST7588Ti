@@ -35,11 +35,11 @@ class LcdDisplay:
 		self.SET_FRAME_150HZ=0x0f
 
 		Reset_Pin=4
-#		GPIO.setmode(GPIO.BCM)
-#		GPIO.setup(Reset_Pin,GPIO.OUT)
-#		GPIO.output(Reset_Pin,GPIO.LOW)
+#		GPIO.setmode(GPIO.BCM)				USELESS
+#		GPIO.setup(Reset_Pin,GPIO.OUT)			USELESS
+#		GPIO.output(Reset_Pin,GPIO.LOW)			USELESS
 		time.sleep(0.05)
-#		GPIO.output(Reset_Pin,GPIO.HIGH)
+#		GPIO.output(Reset_Pin,GPIO.HIGH)		USELESS
 		time.sleep(0.05)
 		self.address=address
 		self.bus=SMBus(1)
@@ -197,13 +197,15 @@ class LcdDisplay:
 		map=self.tohex(self.FRAME_BUFFER)
 		self.display_map(map)
 
-	def draw_rectangle(self,x,y,w,h,o,f):
+	def draw_rectangle(self,x1,y1,x2,y2, param_fill, param_outline, param_width):
+	#param_outline=None or 1; Color to use for the outline
+	#param_fill=None or 1; Color to use for the fill.
 		draw=ImageDraw.Draw(self.FRAME_BUFFER)
-		draw.rectangle((x,y,w,h), outline=o, fill=f)		
+		draw.rectangle([(x1,y1),(x2,y2)],fill=param_fill, outline=outline, width=param_width)		
 
-	def draw_text(self,x,y,s,font_file,font_size,param_spacing,param_align):
+	def draw_text(self,x,y,param_text,param_fill,font_file,font_size,param_anchor,param_spacing,param_align):
         #align must be “left”, “center” or “right”.
         #spacing number of pixels between lines
 		draw=ImageDraw.Draw(self.FRAME_BUFFER)
 		police=ImageFont.truetype(font_file, font_size)
-		draw.text((x,y),s,font=police,spacing=param_spacing,align=param_align)
+		draw.text([(x,y),param_text,font=font_file,fill=param_fill,anchor=param_anchor,spacing=param_spacing,align=param_align)
