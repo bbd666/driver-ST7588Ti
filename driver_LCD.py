@@ -201,11 +201,13 @@ class LcdDisplay:
 	#param_outline=None or 1; Color to use for the outline
 	#param_fill=None or 1; Color to use for the fill.
 		draw=ImageDraw.Draw(self.FRAME_BUFFER)
-		draw.rectangle([(x1,y1),(x2,y2)],fill=param_fill, outline=outline, width=param_width)		
+		draw.rectangle([(x1,y1),(x2,y2)],fill=param_fill, outline=param_outline, width=param_width)		
 
 	def draw_text(self,x,y,param_text,param_fill,font_file,font_size,param_anchor,param_spacing,param_align):
         #align must be “left”, “center” or “right”.
+	#param_fill=None or 1; Color to use for the text.
         #spacing number of pixels between lines
 		draw=ImageDraw.Draw(self.FRAME_BUFFER)
 		police=ImageFont.truetype(font_file, font_size)
-		draw.text([(x,y),param_text,font=font_file,fill=param_fill,anchor=param_anchor,spacing=param_spacing,align=param_align)
+		draw.text((x,y),param_text,font=police,fill=param_fill,anchor=param_anchor,spacing=param_spacing,align=param_align)
+
