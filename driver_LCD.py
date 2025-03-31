@@ -211,7 +211,7 @@ class LcdDisplay:
 		draw.text((x,y),param_text,font=police,fill=param_fill,anchor=param_anchor,spacing=param_spacing,align=param_align)
 
 	def draw_multiline_text(self,x,y,param_text,param_fill,font_file,font_size,param_anchor,param_spacing,param_align):
-        #param_text contains all lines. Line separator is \n
+        #param_text contains all lines in one string. Line separator is \n
         #align must be “left”, “center” or “right”.
 	#param_fill=None or 1; Color to use for the text.
         #spacing number of pixels between lines
