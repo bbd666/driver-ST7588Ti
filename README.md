@@ -5,6 +5,7 @@ Please find a driver for ST7588Ti LCD for use with Raspberry in python.
 What you must know before using these devices :
 
 They have 15 pins.
+![Capture](https://github.com/user-attachments/assets/61439a8d-942d-42b4-a002-9dabcbb25eeb)
 They have no Backlight embedded. In general the Backlight is mounted apart from the display onto the PCB. It is modulated with PWM.
 It is powered on pin 11 (J2.GPIO 18) with 3.3V
 But pin 1 and pin 10  (J2.GPIO 16) must also be powered with 12 V through PCB resistors.
