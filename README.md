@@ -40,4 +40,8 @@ It also requires the SMBUS3 library :
 
 https://pypi.org/project/smbus3/
 
+and the rpi hardware pwm lib :
+
+pip install rpi-hardware-pwm
+
 Then just copy the python script driver_ST5788Ti.py in your folder.
