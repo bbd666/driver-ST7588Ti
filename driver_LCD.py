@@ -2,7 +2,6 @@ from smbus3 import SMBus
 import time
 from time import sleep
 import RPi.GPIO as GPIO
-from rpi_hardware_pwm import HardwarePWM
 from PIL import Image, ImageDraw, ImageFont
 
 class LcdDisplay:
