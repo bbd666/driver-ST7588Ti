@@ -161,7 +161,6 @@ class LcdDisplay:
 	def clean_display(self):
 		self.FRAME_BUFFER=Image.new('1',(132,80))
 		map=self.tohex(self.FRAME_BUFFER)
-		self.display_map(map)
 		
 	def set_intensity(self,s):
 		pwm = HardwarePWM(pwm_channel=0, hz=50, chip=0)
@@ -192,7 +191,7 @@ class LcdDisplay:
 	def load_image(self,image):
 		self.FRAME_BUFFER=image
 
-	def refresh(self):
+	def update_diplay(self):
 		map=self.tohex(self.FRAME_BUFFER)
 		self.display_map(map)
 
@@ -209,4 +208,14 @@ class LcdDisplay:
 		draw=ImageDraw.Draw(self.FRAME_BUFFER)
 		police=ImageFont.truetype(font_file, font_size)
 		draw.text((x,y),param_text,font=police,fill=param_fill,anchor=param_anchor,spacing=param_spacing,align=param_align)
+
+	def draw_multiline_text(self,x,y,param_text,param_fill,font_file,font_size,param_anchor,param_spacing,param_align):
+        #param_text contains all lines in one string. Line separator is \n
+        #align must be “left”, “center” or “right”.
+	#param_fill=None or 1; Color to use for the text.
+        #spacing number of pixels between lines
+		draw=ImageDraw.Draw(self.FRAME_BUFFER)
+		police=ImageFont.truetype(font_file, font_size)
+		draw.multiline_text((x,y),param_text,font=police,fill=param_fill,anchor=param_anchor,spacing=param_spacing,align=param_align)
+
 
