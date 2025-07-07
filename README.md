@@ -9,7 +9,7 @@ They have 15 pins.
 They have no Backlight embedded. In general the Backlight is mounted apart from the screen onto the PCB. It is modulated with PWM.
 It is powered on pin 11 (J2.GPIO 18) with 3.3V
 But pin 1 and pin 10  (J2.GPIO 16) must also be powered with 9 V through PCB resistors.
-![427439347-cea4614f-9ed3-4670-bb34-7aa08d37259c](https://github.com/user-attachments/assets/1c405e9e-23ca-4046-baca-3e314ba76796)
+![436679464-1c405e9e-23ca-4046-baca-3e314ba76796](https://github.com/user-attachments/assets/7119a3b1-2e64-4b75-80e4-691998e042da)
 
 the RESET pin is useless in fact as the initialization is managed by hardware on the PCB (pin 15 (J2.GPIO 9)).
 Then 2 channels for data transfers SDA and SDL on pins 13 (J2.GPIO 4) and pin 14 (J2.GPIO 6).
