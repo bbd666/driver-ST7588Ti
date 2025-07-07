@@ -13,7 +13,7 @@ But pin 1 and pin 10  (J2.GPIO 16) must also be powered with 12 V through PCB re
 
 the RESET pin is useless in fact as the initialization is managed by hardware on the PCB (pin 15 (J2.GPIO 9)).
 Then 2 channels for data transfers SDA and SDL on pins 13 (J2.GPIO 4) and pin 14 (J2.GPIO 6).
-the SDA and SCL must be pulled-up :
+the SDA and SCL pins must be pulled-up :
 ![Capture d’écran 2025-06-30 095724](https://github.com/user-attachments/assets/426a993b-69a4-4408-a071-da047552ef11)
 
 
