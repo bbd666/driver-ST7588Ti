@@ -44,4 +44,4 @@ It also requires the SMBUS3 library :
 https://pypi.org/project/smbus3/
 
 
-Then just copy the python script driver_ST5788Ti.py in your folder.
+Then just copy the python script driver_LCD.py in your folder.
