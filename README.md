@@ -8,7 +8,7 @@ They have 15 pins.
 ![Capture](https://github.com/user-attachments/assets/61439a8d-942d-42b4-a002-9dabcbb25eeb)
 They have no Backlight embedded. In general the Backlight is mounted apart from the screen onto the PCB. It is modulated with PWM.
 It is powered on pin 11 (J2.GPIO 18) with 3.3V
-But pin 1 and pin 10  (J2.GPIO 16) must also be powered with 9 V through PCB resistors. 9V is the rated value, but I found 11 V gives better results.
+But pin 1 and pin 10  (J2.GPIO 16) must also be powered with 9 V through PCB resistors. 9 V is the rated value, but I found 11 V gives better results (9 V wasn't enough to display things).
 ![436679464-1c405e9e-23ca-4046-baca-3e314ba76796](https://github.com/user-attachments/assets/7119a3b1-2e64-4b75-80e4-691998e042da)
 
 the RESET pin is useless in fact as the initialization is managed by hardware on the PCB (pin 15 (J2.GPIO 9)).
