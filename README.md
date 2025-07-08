@@ -37,11 +37,9 @@ Complete information here :
 
 https://pillow.readthedocs.io/en/stable/installation/basic-installation.html#basic-installation
 
-It also requires the SMBUS3 library :
+It also requires the smbus library which should be present by default. In case it isn't :
 
-`pip install smbus3`
-
-https://pypi.org/project/smbus3/
+`sudo apt-get install python3-smbus`
 
 
 Then just copy the python script driver_LCD.py in your folder.
