@@ -1,4 +1,4 @@
-from smbus import SMBus
+import smbus
 import time
 from time import sleep
 import RPi.GPIO as GPIO
@@ -46,7 +46,7 @@ class LcdDisplay:
 #		GPIO.output(Reset_Pin,GPIO.HIGH)		USELESS
 		time.sleep(0.05)
 		self.address=address
-		self.bus=SMBus(1)
+		self.bus=smbus.SMBus(1)
 		wrdata = [self.SEND_COMMAND,self.SET_H00]
 		self.i2c_write (self.address, wrdata)
 		time.sleep(0.05)
