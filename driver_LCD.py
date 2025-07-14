@@ -1,4 +1,4 @@
-from smbus3 import SMBus
+import smbus
 import time
 from time import sleep
 import RPi.GPIO as GPIO
@@ -8,7 +8,7 @@ class LcdDisplay:
 	def __init__(self,address=0x3f):
 		GPIO.setmode(GPIO.BCM)
 		GPIO.setup(18,GPIO.OUT)
-		self.pwm = GPIO.PWM(18,50)
+		self.pwm = GPIO.PWM(18,200)
 		self.FRAME_BUFFER=Image.new('1',(132,80))
 		self.police1= ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 12)
 		self.SEND_COMMAND=0x00                       #A0=0
@@ -46,7 +46,7 @@ class LcdDisplay:
 #		GPIO.output(Reset_Pin,GPIO.HIGH)		USELESS
 		time.sleep(0.05)
 		self.address=address
-#		self.bus=SMBus(1)
+		self.bus=smbus.SMBus(1)
 		wrdata = [self.SEND_COMMAND,self.SET_H00]
 		self.i2c_write (self.address, wrdata)
 		time.sleep(0.05)
@@ -89,16 +89,15 @@ class LcdDisplay:
 		self.i2c_write (self.address, wrdata)
 	
 	def i2c_write (self,devaddr,regdata):
-#		attempt=False
-#		while not(attempt==True):
+		attempt=False
+		while not(attempt==True):
 			try:
-				with SMBus(1) as self.bus:
-					self.bus.i2c_wr(devaddr,regdata)
-#				attempt=True
-#				return True
+				self.bus.write_byte_data(devaddr,regdata[0],regdata[1])
+				attempt=True
+				return True
 			except IOError:
 				attempt=False
-#				return None
+				return None
 
 	def draw_pixel(self,x,y):
 ######### x colonne, y ligne  ####################################
@@ -151,7 +150,6 @@ class LcdDisplay:
 		wrdata = [self.SEND_COMMAND,self.SET_H00]
 		self.i2c_write (self.address, wrdata)
 		wrdata = [self.SEND_COMMAND,self.SET_DISPLAY_OFF]
-#		wrdata = [self.SEND_COMMAND,self.SET_CHIP_DOWN]
 		self.i2c_write (self.address, wrdata)
 		wrdata = [self.SEND_COMMAND,0xe0|0x00] #SET X ADDRESS (L)  0000
 		self.i2c_write (self.address, wrdata)
@@ -167,7 +165,6 @@ class LcdDisplay:
 		wrdata = [self.SEND_COMMAND,0x06]      #END
 		self.i2c_write (self.address, wrdata)
 		wrdata = [self.SEND_COMMAND,self.SET_NORMAL_DISPLAY]
-#		wrdata = [self.SEND_COMMAND,self.SET_CHIP_ACTIVE]
 		self.i2c_write (self.address, wrdata)
 
 	def clean_display(self):
