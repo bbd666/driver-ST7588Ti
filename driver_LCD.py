@@ -1,4 +1,8 @@
-import smbus
+lib="smbus"
+if lib=="smbus":
+	import smbus				#smbus
+else:
+	from smbus3 import SMBus	#smbus3
 import time
 from time import sleep
 import RPi.GPIO as GPIO
@@ -8,7 +12,7 @@ class LcdDisplay:
 	def __init__(self,address=0x3f):
 		GPIO.setmode(GPIO.BCM)
 		GPIO.setup(18,GPIO.OUT)
-		self.pwm = GPIO.PWM(18,200)
+		self.pwm = GPIO.PWM(18,40)
 		self.FRAME_BUFFER=Image.new('1',(132,80))
 		self.police1= ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 12)
 		self.SEND_COMMAND=0x00                       #A0=0
@@ -37,16 +41,21 @@ class LcdDisplay:
 		self.SET_FRAME_50HZ=0x08
 		self.SET_FRAME_73HZ=0x0b
 		self.SET_FRAME_150HZ=0x0f
-
-#		Reset_Pin=4
-#		GPIO.setmode(GPIO.BCM)				USELESS
-#		GPIO.setup(Reset_Pin,GPIO.OUT)			USELESS
-#		GPIO.output(Reset_Pin,GPIO.LOW)			USELESS
+		self.SET_FULL_DISPLAY=0x04		
+		self.SET_PARTIAL_DISPLAY=0x05
+		
+		Reset_Pin=4
+		GPIO.setmode(GPIO.BCM)					#USELESS
+		GPIO.setup(Reset_Pin,GPIO.OUT)			#USELESS
+		GPIO.output(Reset_Pin,GPIO.LOW)			#USELESS
 		time.sleep(0.05)
-#		GPIO.output(Reset_Pin,GPIO.HIGH)		USELESS
+		GPIO.output(Reset_Pin,GPIO.HIGH)		#USELESS
 		time.sleep(0.05)
 		self.address=address
-		self.bus=smbus.SMBus(1)
+		if lib=="smbus":
+			self.bus=smbus.SMBus(1)				#smbus
+		else:
+			self.bus=SMBus(1)					#smbus3
 		wrdata = [self.SEND_COMMAND,self.SET_H00]
 		self.i2c_write (self.address, wrdata)
 		time.sleep(0.05)
@@ -84,6 +93,8 @@ class LcdDisplay:
 		self.i2c_write(self.address,wrdata)
 		wrdata = [self.SEND_COMMAND,self.SET_ALL_SEGMENTS_ON]
 		self.i2c_write(self.address,wrdata)
+#		wrdata = [self.SEND_COMMAND,self.SET_FULL_DISPLAY]
+#		self.i2c_write (self.address, wrdata)
 		wrdata = [self.SEND_COMMAND,self.SET_NORMAL_DISPLAY]
 #		time.sleep(0.01)
 		self.i2c_write (self.address, wrdata)
@@ -93,8 +104,10 @@ class LcdDisplay:
 		while not(attempt==True):
 			try:
 				self.bus.write_byte_data(devaddr,regdata[0],regdata[1])
-				attempt=True
-				return True
+				read_byte=self.bus.read_byte_data(devaddr,regdata[0])	
+				if (read_byte==regdata[1]):			
+					attempt=True
+					return True
 			except IOError:
 				attempt=False
 				return None
@@ -145,6 +158,29 @@ class LcdDisplay:
 		wrdata = [self.SEND_COMMAND,self.SET_NORMAL_DISPLAY]
 		self.i2c_write (self.address, wrdata)
 
+	def draw_area(self,map,x1,x2,y1,y2):
+######### x colonne, y page  ####################################
+		wrdata = [self.SEND_COMMAND,self.SET_H00]
+		self.i2c_write(self.address,wrdata)
+		wrdata = [self.SEND_COMMAND,self.SET_DISPLAY_OFF]
+#		self.i2c_write (self.address, wrdata)
+		for j in range(y2-y1):
+			for i in range(x2-x1):
+				x=min(i+x1,131)
+				xlow=x & 0x0f
+				xhigh=(0xf0 & x) >> 4
+				wrdata = [self.SEND_COMMAND,0xe0|xlow]
+				self.i2c_write (self.address, wrdata)
+				wrdata = [self.SEND_COMMAND,0xf0|xhigh]
+				self.i2c_write (self.address, wrdata)
+				ypage=(j+y1)
+				wrdata = [self.SEND_COMMAND,0x40|ypage]
+				self.i2c_write (self.address, wrdata)
+				ysegment=map[ypage*132+x]
+				wrdata = [self.SEND_DATA,ysegment]
+				self.i2c_write (self.address, wrdata)
+		wrdata = [self.SEND_COMMAND,self.SET_NORMAL_DISPLAY]
+#		self.i2c_write (self.address, wrdata)
 
 	def display_map(self,map):
 		wrdata = [self.SEND_COMMAND,self.SET_H00]
@@ -166,6 +202,28 @@ class LcdDisplay:
 		self.i2c_write (self.address, wrdata)
 		wrdata = [self.SEND_COMMAND,self.SET_NORMAL_DISPLAY]
 		self.i2c_write (self.address, wrdata)
+
+	def display_submap(self,map,i_inf,i_max):
+		wrdata = [self.SEND_COMMAND,self.SET_H00]
+		self.i2c_write (self.address, wrdata)
+		wrdata = [self.SEND_COMMAND,self.SET_DISPLAY_OFF]
+		self.i2c_write (self.address, wrdata)
+		wrdata = [self.SEND_COMMAND,0xe0|0x00] #SET X ADDRESS (L)  0000
+		self.i2c_write (self.address, wrdata)
+		wrdata = [self.SEND_COMMAND,0xf0|0x00] #SET X ADDRESS (H)  0000
+		self.i2c_write (self.address, wrdata)
+		wrdata = [self.SEND_COMMAND,0x40|i_inf] #SET Y ADDRESS      0000
+		self.i2c_write (self.address, wrdata)
+		wrdata = [self.SEND_COMMAND,0x07]      #READ / MODIFY / WRITE
+		self.i2c_write (self.address, wrdata)
+		for i in range((i_max-i_inf)*132):
+			wrdata = [self.SEND_DATA,map[i+i_inf*132]]
+			self.i2c_write (self.address, wrdata)
+		wrdata = [self.SEND_COMMAND,0x06]      #END
+		self.i2c_write (self.address, wrdata)
+		wrdata = [self.SEND_COMMAND,self.SET_NORMAL_DISPLAY]
+		self.i2c_write (self.address, wrdata)
+
 
 	def clean_display(self):
 		self.FRAME_BUFFER=Image.new('1',(132,80))
@@ -199,6 +257,14 @@ class LcdDisplay:
 	def update_display(self):
 		map=self.tohex(self.FRAME_BUFFER)
 		self.display_map(map)
+		
+	def update_submap(self,i_inf,i_max):
+		map=self.tohex(self.FRAME_BUFFER)
+		self.display_submap(map,i_inf,i_max)
+		
+	def update_area(self,i_inf,i_max,j_inf,j_max):
+		map=self.tohex(self.FRAME_BUFFER)
+		self.draw_area(map,i_inf,i_max,j_inf,j_max)
 
 	def draw_rectangle(self,x1,y1,x2,y2, param_fill, param_outline, param_width):
 	#param_outline=None or 1; Color to use for the outline
