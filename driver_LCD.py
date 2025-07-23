@@ -1,8 +1,14 @@
-lib="smbus"
+lib="busio"
+
 if lib=="smbus":
-	import smbus				#smbus
+	import smbus				    #smbus
 else:
-	from smbus3 import SMBus	#smbus3
+    if lib=="smbus3":
+        from smbus3 import SMBus	#smbus3
+    else:
+        import busio                #busio
+        import board
+        
 import time
 from time import sleep
 import RPi.GPIO as GPIO
@@ -53,9 +59,14 @@ class LcdDisplay:
 		time.sleep(0.05)
 		self.address=address
 		if lib=="smbus":
-			self.bus=smbus.SMBus(1)				#smbus
+			self.bus=smbus.SMBus(1)				        #smbus
 		else:
-			self.bus=SMBus(1)					#smbus3
+            if lib=="smbus3":
+                self.bus=SMBus(1)					    #smbus3
+            else:
+                self.i2c=busio.I2C(board.SCL,board.SDA) #busio
+                while nit self.i2c.try_lock():
+                    pass
 		wrdata = [self.SEND_COMMAND,self.SET_H00]
 		self.i2c_write (self.address, wrdata)
 		time.sleep(0.05)
@@ -103,9 +114,10 @@ class LcdDisplay:
 		attempt=False
 		while not(attempt==True):
 			try:
-				self.bus.write_byte_data(devaddr,regdata[0],regdata[1])
-				read_byte=self.bus.read_byte_data(devaddr,regdata[0])	
-				if (read_byte==regdata[1]):			
+                if lib=="busio":
+                    self.i2c.writeto(devaddr,bytes([regdata[0],regdata[1]]))
+                else:
+                    self.bus.write_byte_data(devaddr,regdata[0],regdata[1])	
 					attempt=True
 					return True
 			except IOError:
