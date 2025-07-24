@@ -3,12 +3,13 @@ lib="busio"
 if lib=="smbus":
 	import smbus				    #smbus
 else:
-    if lib=="smbus3":
-        from smbus3 import SMBus	#smbus3
-    else:
-        import busio                #busio
-        import board
-        
+	if lib=="smbus3":
+		from smbus3 import SMBus,i2c_msg	#smbus3
+	else:
+		import busio                #busio
+		import board
+    
+import array    
 import time
 from time import sleep
 import RPi.GPIO as GPIO
@@ -61,180 +62,194 @@ class LcdDisplay:
 		if lib=="smbus":
 			self.bus=smbus.SMBus(1)				        #smbus
 		else:
-            if lib=="smbus3":
-                self.bus=SMBus(1)					    #smbus3
-            else:
-                self.i2c=busio.I2C(board.SCL,board.SDA) #busio
-                while nit self.i2c.try_lock():
-                    pass
-		wrdata = [self.SEND_COMMAND,self.SET_H00]
-		self.i2c_write (self.address, wrdata)
+			if lib=="smbus3":
+				self.bus=SMBus(1)					    #smbus3
+			else:
+				self.i2c=busio.I2C(board.SCL,board.SDA) #busio
+				while not self.i2c.try_lock():
+					pass
+		wrdata = [self.SET_H00]
+		self.i2c_write (self.address,self.SEND_COMMAND, wrdata)
 		time.sleep(0.05)
-		wrdata = [self.SEND_COMMAND,self.SET_DISPLAY_OFF]
-		self.i2c_write (self.address, wrdata)
+		wrdata = [self.SET_DISPLAY_OFF]
+		self.i2c_write (self.address,self.SEND_COMMAND, wrdata)
 		time.sleep(0.01)
-		wrdata = [self.SEND_COMMAND,self.SET_H01]
-		self.i2c_write (self.address, wrdata)
+		wrdata = [self.SET_H01]
+		self.i2c_write (self.address,self.SEND_COMMAND,wrdata)
 		time.sleep(0.001)
-		wrdata = [self.SEND_COMMAND,self.SET_LSB|self.SET_HORIZONTAL_ADDRESSING]
-		self.i2c_write (self.address, wrdata)
-		wrdata = [self.SEND_COMMAND,self.SET_BIAS_9]
-		self.i2c_write (self.address, wrdata)
+		wrdata = [self.SET_LSB|self.SET_HORIZONTAL_ADDRESSING]
+		self.i2c_write (self.address,self.SEND_COMMAND, wrdata)
+		wrdata = [self.SET_BIAS_9]
+		self.i2c_write (self.address, self.SEND_COMMAND,wrdata)
 		time.sleep(0.001)
-		wrdata = [self.SEND_COMMAND,self.SET_V0_LOWER_BITS]
-		self.i2c_write (self.address, wrdata)
+		wrdata = [self.SET_V0_LOWER_BITS]
+		self.i2c_write (self.address, self.SEND_COMMAND,wrdata)
 		time.sleep(0.01)
-		wrdata = [self.SEND_COMMAND,self.SET_H00]
-		self.i2c_write (self.address, wrdata)
+		wrdata = [self.SET_H00]
+		self.i2c_write (self.address,self.SEND_COMMAND, wrdata)
 		time.sleep(0.01)
-		wrdata = [self.SEND_COMMAND,self.SET_V0_RANGE]
-		self.i2c_write (self.address, wrdata)
+		wrdata = [self.SET_V0_RANGE]
+		self.i2c_write (self.address,self.SEND_COMMAND, wrdata)
 		time.sleep(0.05)
-		wrdata = [self.SEND_COMMAND,self.SET_H11]
-		self.i2c_write (self.address, wrdata)
+		wrdata = [self.SET_H11]
+		self.i2c_write (self.address,self.SEND_COMMAND, wrdata)
 		time.sleep(0.02)
-		wrdata = [self.SEND_COMMAND,self.SET_FRAME_150HZ]
-		self.i2c_write (self.address, wrdata)
+		wrdata = [self.SET_FRAME_150HZ]
+		self.i2c_write (self.address, self.SEND_COMMAND,wrdata)
 		time.sleep(0.01)
-		wrdata = [self.SEND_COMMAND,self.SET_H10]
-		self.i2c_write (self.address, wrdata)
-		wrdata = [self.SEND_COMMAND,0x04]
-		self.i2c_write (self.address, wrdata)
-		wrdata = [self.SEND_COMMAND,self.SET_H00]
-		self.i2c_write(self.address,wrdata)
-		wrdata = [self.SEND_COMMAND,self.SET_ALL_SEGMENTS_ON]
-		self.i2c_write(self.address,wrdata)
+		wrdata = [self.SET_H10]
+		self.i2c_write (self.address,self.SEND_COMMAND, wrdata)
+		wrdata = [0x04]
+		self.i2c_write (self.address, self.SEND_COMMAND,wrdata)
+		wrdata = [self.SET_H00]
+		self.i2c_write(self.address,self.SEND_COMMAND,wrdata)
+#		wrdata = [self.SET_ALL_SEGMENTS_ON]
+#		self.i2c_write(self.address,self.SEND_COMMAND,wrdata)
 #		wrdata = [self.SEND_COMMAND,self.SET_FULL_DISPLAY]
-#		self.i2c_write (self.address, wrdata)
-		wrdata = [self.SEND_COMMAND,self.SET_NORMAL_DISPLAY]
+#		self.i2c_write (self.address,self.SEND_COMMAND, wrdata)
+		wrdata = [self.SET_NORMAL_DISPLAY]
 #		time.sleep(0.01)
-		self.i2c_write (self.address, wrdata)
+		self.i2c_write (self.address,self.SEND_COMMAND, wrdata)
 	
-	def i2c_write (self,devaddr,regdata):
+	def i2c_write (self,devaddr,regdata1,regdata2):
 		attempt=False
+		s=[]
+		for i in range(len(regdata2)):
+			s.append(regdata2[i])
 		while not(attempt==True):
 			try:
-                if lib=="busio":
-                    self.i2c.writeto(devaddr,bytes([regdata[0],regdata[1]]))
-                else:
-                    self.bus.write_byte_data(devaddr,regdata[0],regdata[1])	
-					attempt=True
-					return True
+				if lib=="busio":
+					self.i2c.writeto(devaddr,bytes([regdata1,s[0]]))
+#					self.i2c.writeto(devaddr,bytes([regdata[0],regdata[1]]))	
+				else:
+#					self.bus.write_i2c_block_data(devaddr,0,regdata)	
+#					self.bus.write_byte_data(devaddr,regdata[0],regdata[1])	
+					self.bus.write_i2c_block_data(devaddr,regdata1,s)
+#					msg=i2c_msg.write(devaddr,s)
+#					self.bus.i2c_rdwr(msg)
+
+				attempt=True
+				return True
 			except IOError:
 				attempt=False
 				return None
 
 	def draw_pixel(self,x,y):
 ######### x colonne, y ligne  ####################################
-		wrdata = [self.SEND_COMMAND,self.SET_H00]
-		self.i2c_write(self.address,wrdata)
-		wrdata = [self.SEND_COMMAND,self.SET_DISPLAY_OFF]
-		self.i2c_write (self.address, wrdata)
+		wrdata = [self.SET_H00]
+		self.i2c_write(self.address,self.SEND_COMMAND,wrdata)
+		wrdata = [self.SET_DISPLAY_OFF]
+		self.i2c_write (self.address,self.SEND_COMMAND, wrdata)
 		x=min(x,131)
 		xlow=x & 0x0f
 		xhigh=(0xf0 & x) >> 4
-		wrdata = [self.SEND_COMMAND,0xe0|xlow]
-		self.i2c_write (self.address, wrdata)
-		wrdata = [self.SEND_COMMAND,0xf0|xhigh]
-		self.i2c_write (self.address, wrdata)
+		wrdata = [0xe0|xlow]
+		self.i2c_write (self.address,self.SEND_COMMAND, wrdata)
+		wrdata = [0xf0|xhigh]
+		self.i2c_write (self.address, self.SEND_COMMAND,wrdata)
 		ypage=y//10
-		wrdata = [self.SEND_COMMAND,0x40|ypage]
-		self.i2c_write (self.address, wrdata)
+		wrdata = [0x40|ypage]
+		self.i2c_write (self.address, self.SEND_COMMAND,wrdata)
 		ysegment=2**(y%10)
-		wrdata = [self.SEND_DATA,ysegment]
-		self.i2c_write (self.address, wrdata)
+		wrdata = [ysegment]
+		self.i2c_write (self.address, self.SEND_DATA,wrdata)
 		time.sleep(0.01)
-		wrdata = [self.SEND_COMMAND,self.SET_NORMAL_DISPLAY]
-		self.i2c_write (self.address, wrdata)
+		wrdata = [self.SET_NORMAL_DISPLAY]
+		self.i2c_write (self.address, self.SEND_COMMAND,wrdata)
 
 	def draw_vert_segment(self,x,y):
 ######### x colonne, y ligne  ####################################
-		wrdata = [self.SEND_COMMAND,self.SET_H00]
-		self.i2c_write(self.address,wrdata)
-		wrdata = [self.SEND_COMMAND,self.SET_DISPLAY_OFF]
-		self.i2c_write (self.address, wrdata)
+		wrdata = [self.SET_H00]
+		self.i2c_write(self.address,self.SEND_COMMAND,wrdata)
+		wrdata = [self.SET_DISPLAY_OFF]
+		self.i2c_write (self.address, self.SEND_COMMAND,wrdata)
 		x=min(x,131)
 		xlow=x & 0x0f
 		xhigh=(0xf0 & x) >> 4
-		wrdata = [self.SEND_COMMAND,0xe0|xlow]
-		self.i2c_write (self.address, wrdata)
-		wrdata = [self.SEND_COMMAND,0xf0|xhigh]
-		self.i2c_write (self.address, wrdata)
+		wrdata = [0xe0|xlow]
+		self.i2c_write (self.address,self.SEND_COMMAND, wrdata)
+		wrdata = [0xf0|xhigh]
+		self.i2c_write (self.address, self.SEND_COMMAND,wrdata)
 		ypage=y//10
-		wrdata = [self.SEND_COMMAND,0x40|ypage]
-		self.i2c_write (self.address, wrdata)
+		wrdata = [0x40|ypage]
+		self.i2c_write (self.address, self.SEND_COMMAND,wrdata)
 		ysegment=2**(y%10)
-		wrdata = [self.SEND_DATA,0xff]
-		self.i2c_write (self.address, wrdata)
+		wrdata = [0xff]
+		self.i2c_write (self.address,self.SEND_DATA, wrdata)
 		time.sleep(0.01)
-		wrdata = [self.SEND_COMMAND,self.SET_NORMAL_DISPLAY]
-		self.i2c_write (self.address, wrdata)
+		wrdata = [self.SET_NORMAL_DISPLAY]
+		self.i2c_write (self.address, self.SEND_COMMAND,wrdata)
 
 	def draw_area(self,map,x1,x2,y1,y2):
 ######### x colonne, y page  ####################################
-		wrdata = [self.SEND_COMMAND,self.SET_H00]
-		self.i2c_write(self.address,wrdata)
-		wrdata = [self.SEND_COMMAND,self.SET_DISPLAY_OFF]
-#		self.i2c_write (self.address, wrdata)
+		wrdata = [self.SET_H00]
+		self.i2c_write(self.address,self.SEND_COMMAND,wrdata)
+		wrdata = [self.SET_DISPLAY_OFF]
+#		self.i2c_write (self.address, self.SEND_COMMAND,wrdata)
 		for j in range(y2-y1):
 			for i in range(x2-x1):
 				x=min(i+x1,131)
 				xlow=x & 0x0f
 				xhigh=(0xf0 & x) >> 4
-				wrdata = [self.SEND_COMMAND,0xe0|xlow]
-				self.i2c_write (self.address, wrdata)
-				wrdata = [self.SEND_COMMAND,0xf0|xhigh]
-				self.i2c_write (self.address, wrdata)
+				wrdata = [0xe0|xlow]
+				self.i2c_write (self.address, self.SEND_COMMAND,wrdata)
+				wrdata = [0xf0|xhigh]
+				self.i2c_write (self.address,self.SEND_COMMAND, wrdata)
 				ypage=(j+y1)
-				wrdata = [self.SEND_COMMAND,0x40|ypage]
-				self.i2c_write (self.address, wrdata)
+				wrdata = [0x40|ypage]
+				self.i2c_write (self.address,self.SEND_COMMAND, wrdata)
 				ysegment=map[ypage*132+x]
-				wrdata = [self.SEND_DATA,ysegment]
-				self.i2c_write (self.address, wrdata)
-		wrdata = [self.SEND_COMMAND,self.SET_NORMAL_DISPLAY]
-#		self.i2c_write (self.address, wrdata)
+				wrdata = [ysegment]
+				self.i2c_write (self.address, self.SEND_DATA,wrdata)
+		wrdata = [self.SET_NORMAL_DISPLAY]
+#		self.i2c_write (self.address,self.SEND_COMMAND, wrdata)
 
 	def display_map(self,map):
-		wrdata = [self.SEND_COMMAND,self.SET_H00]
-		self.i2c_write (self.address, wrdata)
-		wrdata = [self.SEND_COMMAND,self.SET_DISPLAY_OFF]
-		self.i2c_write (self.address, wrdata)
-		wrdata = [self.SEND_COMMAND,0xe0|0x00] #SET X ADDRESS (L)  0000
-		self.i2c_write (self.address, wrdata)
-		wrdata = [self.SEND_COMMAND,0xf0|0x00] #SET X ADDRESS (H)  0000
-		self.i2c_write (self.address, wrdata)
-		wrdata = [self.SEND_COMMAND,0x40|0x00] #SET Y ADDRESS      0000
-		self.i2c_write (self.address, wrdata)
-		wrdata = [self.SEND_COMMAND,0x07]      #READ / MODIFY / WRITE
-		self.i2c_write (self.address, wrdata)
+		wrdata = [self.SET_H00]
+		self.i2c_write (self.address, self.SEND_COMMAND,wrdata)
+		wrdata = [self.SET_DISPLAY_OFF]
+		self.i2c_write (self.address, self.SEND_COMMAND,wrdata)
+		wrdata = [0xe0|0x00] #SET X ADDRESS (L)  0000
+		self.i2c_write (self.address,self.SEND_COMMAND, wrdata)
+		wrdata = [0xf0|0x00] #SET X ADDRESS (H)  0000
+		self.i2c_write (self.address,self.SEND_COMMAND, wrdata)
+		wrdata = [0x40|0x00] #SET Y ADDRESS      0000
+		self.i2c_write (self.address, self.SEND_COMMAND,wrdata)
+		wrdata = [0x07]      #READ / MODIFY / WRITE
+		self.i2c_write (self.address, self.SEND_COMMAND,wrdata)
+#		for j in range(40):
+#			wrdata=[]
+#			for i in range(32):
+#				wrdata.append(map[i+(j-1)*31])
+#			self.i2c_write (self.address, self.SEND_DATA,wrdata)
 		for i in range(1320):
-			wrdata = [self.SEND_DATA,map[i]]
-			self.i2c_write (self.address, wrdata)
-		wrdata = [self.SEND_COMMAND,0x06]      #END
-		self.i2c_write (self.address, wrdata)
-		wrdata = [self.SEND_COMMAND,self.SET_NORMAL_DISPLAY]
-		self.i2c_write (self.address, wrdata)
+			wrdata=[map[i]]
+			self.i2c_write (self.address, self.SEND_DATA,wrdata)
+		wrdata = [0x06]      #END
+		self.i2c_write (self.address, self.SEND_COMMAND,wrdata)
+		wrdata = [self.SET_NORMAL_DISPLAY]
+		self.i2c_write (self.address, self.SEND_COMMAND,wrdata)
 
 	def display_submap(self,map,i_inf,i_max):
-		wrdata = [self.SEND_COMMAND,self.SET_H00]
-		self.i2c_write (self.address, wrdata)
-		wrdata = [self.SEND_COMMAND,self.SET_DISPLAY_OFF]
-		self.i2c_write (self.address, wrdata)
-		wrdata = [self.SEND_COMMAND,0xe0|0x00] #SET X ADDRESS (L)  0000
-		self.i2c_write (self.address, wrdata)
-		wrdata = [self.SEND_COMMAND,0xf0|0x00] #SET X ADDRESS (H)  0000
-		self.i2c_write (self.address, wrdata)
-		wrdata = [self.SEND_COMMAND,0x40|i_inf] #SET Y ADDRESS      0000
-		self.i2c_write (self.address, wrdata)
-		wrdata = [self.SEND_COMMAND,0x07]      #READ / MODIFY / WRITE
-		self.i2c_write (self.address, wrdata)
+		wrdata = [self.SET_H00]
+		self.i2c_write (self.address, self.SEND_COMMAND,wrdata)
+		wrdata = [self.SET_DISPLAY_OFF]
+		self.i2c_write (self.address,self.SEND_COMMAND, wrdata)
+		wrdata = [0xe0|0x00] #SET X ADDRESS (L)  0000
+		self.i2c_write (self.address, self.SEND_COMMAND,wrdata)
+		wrdata = [0xf0|0x00] #SET X ADDRESS (H)  0000
+		self.i2c_write (self.address, self.SEND_COMMAND,wrdata)
+		wrdata = [0x40|i_inf] #SET Y ADDRESS      0000
+		self.i2c_write (self.address, self.SEND_COMMAND,wrdata)
+		wrdata = [0x07]      #READ / MODIFY / WRITE
+		self.i2c_write (self.address,self.SEND_COMMAND, wrdata)
 		for i in range((i_max-i_inf)*132):
-			wrdata = [self.SEND_DATA,map[i+i_inf*132]]
+			wrdata = [map[i+i_inf*132]]
 			self.i2c_write (self.address, wrdata)
 		wrdata = [self.SEND_COMMAND,0x06]      #END
-		self.i2c_write (self.address, wrdata)
-		wrdata = [self.SEND_COMMAND,self.SET_NORMAL_DISPLAY]
-		self.i2c_write (self.address, wrdata)
+		self.i2c_write (self.address, self.SEND_DATA,wrdata)
+		wrdata = [self.SET_NORMAL_DISPLAY]
+		self.i2c_write (self.address, self.SEND_COMMAND,wrdata)
 
 
 	def clean_display(self):
@@ -246,8 +261,8 @@ class LcdDisplay:
 		self.pwm.ChangeDutyCycle(intensity)
 
 	def set_normal_display(self):
-		wrdata = [self.SEND_COMMAND,self.SET_NORMAL_DISPLAY]
-		self.i2c_write (self.address, wrdata)
+		wrdata = [self.SET_NORMAL_DISPLAY]
+		self.i2c_write (self.address, self.SEND_COMMAND,wrdata)
 
 	def tohex(self,image):
 		res=[]
